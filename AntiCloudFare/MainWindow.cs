@@ -199,11 +199,15 @@ namespace AntiCloudFare
 
         private async Task doLoadAsync(String lstrSlugName)
         {
-            CoreWebView2EnvironmentOptions Options = new CoreWebView2EnvironmentOptions();
-            Options.AdditionalBrowserArguments = "--proxy-server="+ proxyUrl;
-            CoreWebView2Environment env =
-            await CoreWebView2Environment.CreateAsync(null, null, Options);
-          //  await webView21.EnsureCoreWebView2Async(env);
+            if(proxyUrl.Length!=0)
+            {
+                CoreWebView2EnvironmentOptions Options = new CoreWebView2EnvironmentOptions();
+                Options.AdditionalBrowserArguments = "--proxy-server=" + proxyUrl;
+                CoreWebView2Environment env =
+                await CoreWebView2Environment.CreateAsync(null, null, Options);
+               // await webView21.EnsureCoreWebView2Async(env);
+            }
+       
             this.webView21.Source = new Uri(String.Format("https://opensea.io/collection/{0}?search[sortAscending]=true&search[sortBy]=PRICE&search[toggles][0]=BUY_NOW", lstrSlugName));
         }
 
