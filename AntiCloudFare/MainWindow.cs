@@ -1,6 +1,7 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
 using EricZhao.UiThread;
+using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,9 +31,11 @@ namespace AntiCloudFare
 
         IniFile lpIniFile = new IniFile("./settings.ini");
         String Url = "http://ai.bhxz.net:1988/floor_price/?";
+        String proxyUrl = "http://ai.bhxz.net:38888";
         public void loadSettings()
         {
             Url = lpIniFile.IniReadStringValue("server", "url", "http://ai.bhxz.net:1988/floor_price/?", true);
+            proxyUrl = lpIniFile.IniReadStringValue("proxy", "url", proxyUrl, true);
 
         }
         async private void WebView21_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
@@ -75,7 +78,7 @@ namespace AntiCloudFare
 
         async void InitializeAsync()
         {
-            await webView21.EnsureCoreWebView2Async(null);
+           // await webView21.EnsureCoreWebView2Async(null);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -150,7 +153,7 @@ namespace AntiCloudFare
                     InvokeUI(() =>
                     {
                         StrCurrentTaskSlug = lpTask;
-                        doLoad(lpTask);
+                        doLoadAsync(lpTask);
                     });
 
                     while (true)
@@ -194,9 +197,14 @@ namespace AntiCloudFare
         }
 
 
-        private void doLoad(String lstrSlugName)
+        private async Task doLoadAsync(String lstrSlugName)
         {
-            this.webView21.CoreWebView2.Navigate(String.Format("https://opensea.io/collection/{0}?search[sortAscending]=true&search[sortBy]=PRICE&search[toggles][0]=BUY_NOW", lstrSlugName));
+            CoreWebView2EnvironmentOptions Options = new CoreWebView2EnvironmentOptions();
+            Options.AdditionalBrowserArguments = "--proxy-server="+ proxyUrl;
+            CoreWebView2Environment env =
+            await CoreWebView2Environment.CreateAsync(null, null, Options);
+          //  await webView21.EnsureCoreWebView2Async(env);
+            this.webView21.Source = new Uri(String.Format("https://opensea.io/collection/{0}?search[sortAscending]=true&search[sortBy]=PRICE&search[toggles][0]=BUY_NOW", lstrSlugName));
         }
 
         Thread lpThread = null;
